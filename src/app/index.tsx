@@ -1,4 +1,4 @@
-import ShobMap from "@/containers/map/shobMap";
+import ShobMap from "@/components/map/shobMap";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 
