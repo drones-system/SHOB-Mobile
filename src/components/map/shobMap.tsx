@@ -1,14 +1,16 @@
 import * as Location from 'expo-location';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
-import MapView from 'react-native-maps';
+import MapView, { Circle } from 'react-native-maps';
 import MapActionButtons from './actionButtons/ActionsButtons';
-
+import DroneMarker from './DroneMarker';
+import { Drone } from '../../types/types';
 
 export default function ShobMap() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const mapRef = useRef<MapView>(null);
+  const [drones, setDrones] = useState<Drone[]>([]);
 
   const focusOnUser = () => {
     if (location && mapRef.current) {
@@ -38,6 +40,63 @@ export default function ShobMap() {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    if (location && drones.length === 0) {
+      const { latitude, longitude } = location.coords;
+      const initialDrones: Drone[] = [
+        {
+          id: '1',
+          type: 'drone',
+          droneId: 'd1',
+          trackId: 't1',
+          classification: 'ally',
+          droneGeom: { type: 'Point', coordinates: [longitude + 0.01, latitude + 0.01] },
+          altitude: 100,
+          height: 100,
+          velocityNorth: 0,
+          velocityEast: 0,
+          velocityUp: 0,
+          heading: 45,
+          gpsTime: new Date().toISOString(),
+          isSim: false,
+        },
+        {
+          id: '2',
+          type: 'drone',
+          droneId: 'd2',
+          trackId: 't2',
+          classification: 'enemy',
+          droneGeom: { type: 'Point', coordinates: [longitude - 0.01, latitude - 0.02] },
+          altitude: 150,
+          height: 150,
+          velocityNorth: 0,
+          velocityEast: 0,
+          velocityUp: 0,
+          heading: 120,
+          gpsTime: new Date().toISOString(),
+          isSim: false,
+        },
+        {
+          id: '3',
+          type: 'drone',
+          droneId: 'd3',
+          trackId: 't3',
+          classification: 'unclassified',
+          droneGeom: { type: 'Point', coordinates: [longitude + 0.02, latitude - 0.01] },
+          altitude: 200,
+          height: 200,
+          velocityNorth: 0,
+          velocityEast: 0,
+          velocityUp: 0,
+          heading: 270,
+          gpsTime: new Date().toISOString(),
+          isSim: false,
+        }
+      ];
+      setDrones(initialDrones);
+    }
+  }, [location, drones.length]);
 
   if (errorMsg) {
     return (
@@ -70,7 +129,18 @@ export default function ShobMap() {
           longitudeDelta: 0.0421,
         }}
         showsUserLocation={true}
-      />
+      >
+        <Circle
+          center={{ latitude, longitude }}
+          radius={5000}
+          strokeWidth={1}
+          strokeColor="#4084FF"
+          lineDashPattern={[5, 5]}
+        />
+        {drones.map((drone) => (
+          <DroneMarker key={drone.id} drone={drone} />
+        ))}
+      </MapView>
       <MapActionButtons onFocusPress={focusOnUser} />
     </View>
   );
