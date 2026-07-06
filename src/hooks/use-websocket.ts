@@ -17,10 +17,10 @@ export type SubscriptionType = "SIM_ONLY" | "NO_SIM_ONLY" | "LOCATION_RADIUS";
 
 export interface UseDroneSocketProps {
   url: string;
-  subscriptionType: SubscriptionType;
+  subscriptionType?: SubscriptionType;
 }
 
-export const useDroneSocket = ({ url, subscriptionType = "SIM_ONLY" }: UseDroneSocketProps) => {
+export const useDroneSocket = ({ url, subscriptionType = "NO_SIM_ONLY" }: UseDroneSocketProps) => {
   const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [snapshot, setSnapshot] = useState<DroneSnapshot | null>(null);
