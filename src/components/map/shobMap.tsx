@@ -2,15 +2,16 @@ import * as Location from 'expo-location';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import MapView, { Circle } from 'react-native-maps';
-import MapActionButtons from './actionButtons/ActionsButtons';
-import DroneMarker from './DroneMarker';
 import { Drone } from '../../types/types';
+import MapActionButtons from './actionButtons/ActionsButtons';
+import DroneComp from './Drone';
 
 export default function ShobMap() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const mapRef = useRef<MapView>(null);
   const [drones, setDrones] = useState<Drone[]>([]);
+  const [focusedDroneId, setFocusedDroneId] = useState<string | null>(null);
 
   const focusOnUser = () => {
     if (location && mapRef.current) {
@@ -57,7 +58,7 @@ export default function ShobMap() {
           velocityNorth: 0,
           velocityEast: 0,
           velocityUp: 0,
-          heading: 45,
+          heading: 120,
           gpsTime: new Date().toISOString(),
           isSim: false,
         },
@@ -89,7 +90,7 @@ export default function ShobMap() {
           velocityNorth: 0,
           velocityEast: 0,
           velocityUp: 0,
-          heading: 270,
+          heading: 120,
           gpsTime: new Date().toISOString(),
           isSim: false,
         }
@@ -129,6 +130,7 @@ export default function ShobMap() {
           longitudeDelta: 0.0421,
         }}
         showsUserLocation={true}
+        onPress={() => setFocusedDroneId(null)}
       >
         <Circle
           center={{ latitude, longitude }}
@@ -138,7 +140,15 @@ export default function ShobMap() {
           lineDashPattern={[5, 5]}
         />
         {drones.map((drone) => (
-          <DroneMarker key={drone.id} drone={drone} />
+          <DroneComp
+            key={drone.id}
+            drone={drone}
+            isFocused={focusedDroneId === drone.id}
+            onPress={() => {
+              console.log("HEYY", focusedDroneId);
+              setFocusedDroneId(focusedDroneId === drone.id ? null : drone.id)
+            }}
+          />
         ))}
       </MapView>
       <MapActionButtons onFocusPress={focusOnUser} />
