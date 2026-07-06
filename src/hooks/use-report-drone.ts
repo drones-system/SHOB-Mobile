@@ -1,9 +1,19 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
+
+export type ReportingMode = 'pointing' | 'text';
 
 export type ReportDronePayload = {
   latitude: number;
   longitude: number;
   description: string;
+  /** Compass heading in degrees [0, 360) when reporting mode is 'pointing' */
+  heading?: number;
+  /** Raw rotation values from DeviceMotion sensor for backend calculation */
+  deviceMotionRotation?: { alpha: number; beta: number; gamma: number } | null;
+  /** Raw magnetometer values for backend calculation */
+  magnetometer?: { x: number; y: number; z: number } | null;
+  /** How the user located the drone */
+  reportingMode: ReportingMode;
 };
 
 export type ReportState = {
@@ -40,6 +50,10 @@ export function useReportDrone() {
           latitude: payload.latitude,
           longitude: payload.longitude,
           description: payload.description,
+          heading: payload.heading ?? null,
+          deviceMotionRotation: payload.deviceMotionRotation ?? null,
+          magnetometer: payload.magnetometer ?? null,
+          reportingMode: payload.reportingMode,
           reportedAt: new Date().toISOString(),
         }),
       });
