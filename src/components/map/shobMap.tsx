@@ -6,9 +6,10 @@ import MapView, { Circle } from 'react-native-maps';
 import { useToast } from "react-native-toast-notifications";
 import MapActionButtons from './actionButtons/ActionsButtons';
 import DroneComp from './Drone';
+import DroneDetails from './DroneDetails';
 
 export default function ShobMap() {
-  const { snapshot, updateLocation, isConnected } = useDroneSocket({ url: 'http://172.17.125.84:3000' });
+  const { snapshot, updateLocation, isConnected } = useDroneSocket({ url: 'http://172.17.124.68:8080' });
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const mapRef = useRef<MapView>(null);
@@ -111,6 +112,9 @@ export default function ShobMap() {
           ))}
         </MapView>
         <MapActionButtons onFocusPress={focusOnUser} />
+        {focusedDroneId && snapshot && snapshot.find(d => d.id === focusedDroneId) && (
+          <DroneDetails drone={snapshot.find(d => d.id === focusedDroneId)!} />
+        )}
       </View>
     </>
   );
