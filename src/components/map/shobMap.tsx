@@ -1,17 +1,31 @@
+import { useDroneSocket } from '@/hooks/use-websocket';
 import * as Location from 'expo-location';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import MapView, { Circle } from 'react-native-maps';
-import { Drone } from '../../types/types';
+import { useToast } from "react-native-toast-notifications";
 import MapActionButtons from './actionButtons/ActionsButtons';
 import DroneComp from './Drone';
 
 export default function ShobMap() {
+  const { snapshot, updateLocation, isConnected } = useDroneSocket({ url: 'http://localhost:3000' });
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const mapRef = useRef<MapView>(null);
-  const [drones, setDrones] = useState<Drone[]>([]);
+  // const [drones, setDrones] = useState<Drone[]>([]);
   const [focusedDroneId, setFocusedDroneId] = useState<string | null>(null);
+  const toast = useToast();
+
+  useEffect(() => {
+    if (!isConnected && toast && typeof toast.show === 'function') {
+      toast.show("Socket connection failed", {
+        type: "danger",
+        placement: "top",
+        duration: 4000,
+        animationType: "slide-in",
+      });
+    }
+  }, [isConnected, toast]);
 
   const focusOnUser = () => {
     if (location && mapRef.current) {
@@ -42,63 +56,6 @@ export default function ShobMap() {
     })();
   }, []);
 
-  useEffect(() => {
-    if (location && drones.length === 0) {
-      const { latitude, longitude } = location.coords;
-      const initialDrones: Drone[] = [
-        {
-          id: '1',
-          type: 'drone',
-          droneId: 'd1',
-          trackId: 't1',
-          classification: 'ally',
-          droneGeom: { type: 'Point', coordinates: [longitude + 0.01, latitude + 0.01] },
-          altitude: 100,
-          height: 100,
-          velocityNorth: 0,
-          velocityEast: 0,
-          velocityUp: 0,
-          heading: 120,
-          gpsTime: new Date().toISOString(),
-          isSim: false,
-        },
-        {
-          id: '2',
-          type: 'drone',
-          droneId: 'd2',
-          trackId: 't2',
-          classification: 'enemy',
-          droneGeom: { type: 'Point', coordinates: [longitude - 0.01, latitude - 0.02] },
-          altitude: 150,
-          height: 150,
-          velocityNorth: 0,
-          velocityEast: 0,
-          velocityUp: 0,
-          heading: 120,
-          gpsTime: new Date().toISOString(),
-          isSim: false,
-        },
-        {
-          id: '3',
-          type: 'drone',
-          droneId: 'd3',
-          trackId: 't3',
-          classification: 'unclassified',
-          droneGeom: { type: 'Point', coordinates: [longitude + 0.02, latitude - 0.01] },
-          altitude: 200,
-          height: 200,
-          velocityNorth: 0,
-          velocityEast: 0,
-          velocityUp: 0,
-          heading: 120,
-          gpsTime: new Date().toISOString(),
-          isSim: false,
-        }
-      ];
-      setDrones(initialDrones);
-    }
-  }, [location, drones.length]);
-
   if (errorMsg) {
     return (
       <View style={styles.center}>
@@ -115,44 +72,47 @@ export default function ShobMap() {
       </View>
     );
   }
-
+  
+  updateLocation({ lat: location.coords.latitude, lng: location.coords.longitude });
   const { latitude, longitude } = location.coords;
 
   return (
-    <View style={styles.container}>
-      <MapView
-        ref={mapRef}
-        style={styles.map}
-        initialRegion={{
-          latitude,
-          longitude,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
-        showsUserLocation={true}
-        onPress={() => setFocusedDroneId(null)}
-      >
-        <Circle
-          center={{ latitude, longitude }}
-          radius={5000}
-          strokeWidth={1}
-          strokeColor="#4084FF"
-          lineDashPattern={[5, 5]}
-        />
-        {drones.map((drone) => (
-          <DroneComp
-            key={drone.id}
-            drone={drone}
-            isFocused={focusedDroneId === drone.id}
-            onPress={() => {
-              console.log("HEYY", focusedDroneId);
-              setFocusedDroneId(focusedDroneId === drone.id ? null : drone.id)
-            }}
+    <>
+      <View style={styles.container}>
+        <MapView
+          ref={mapRef}
+          style={styles.map}
+          initialRegion={{
+            latitude,
+            longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+          showsUserLocation={true}
+          onPress={() => setFocusedDroneId(null)}
+        >
+          <Circle
+            center={{ latitude, longitude }}
+            radius={5000}
+            strokeWidth={1}
+            strokeColor="#4084FF"
+            lineDashPattern={[5, 5]}
           />
-        ))}
-      </MapView>
-      <MapActionButtons onFocusPress={focusOnUser} />
-    </View>
+          {isConnected && snapshot && snapshot.map((drone) => (
+            <DroneComp
+              key={drone.id}
+              drone={drone}
+              isFocused={focusedDroneId === drone.id}
+              onPress={() => {
+                console.log("HEYY", focusedDroneId);
+                setFocusedDroneId(focusedDroneId === drone.id ? null : drone.id)
+              }}
+            />
+          ))}
+        </MapView>
+        <MapActionButtons onFocusPress={focusOnUser} />
+      </View>
+    </>
   );
 }
 

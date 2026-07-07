@@ -1,14 +1,8 @@
+import { Drone } from "@/types/types";
 import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
 export interface LocationData {
-  lat: number;
-  lng: number;
-}
-
-export interface DroneSnapshot {
-  id: string;
-  status: string;
   lat: number;
   lng: number;
 }
@@ -23,7 +17,7 @@ export interface UseDroneSocketProps {
 export const useDroneSocket = ({ url, subscriptionType = "NO_SIM_ONLY" }: UseDroneSocketProps) => {
   const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [snapshot, setSnapshot] = useState<DroneSnapshot | null>(null);
+  const [snapshot, setSnapshot] = useState<Drone[] | null>(null);
 
   useEffect(() => {
     // Create the socket reference and config for connection
@@ -48,12 +42,13 @@ export const useDroneSocket = ({ url, subscriptionType = "NO_SIM_ONLY" }: UseDro
       });
     });
 
-    socket.on("drones.snapshot", (data: DroneSnapshot) => {
+    socket.on("drones.snapshot", (data: Drone[]) => {
       setSnapshot(data);
     });
 
     socket.on("connect_error", (err) => {
-      console.error("React Native connection error:", err.message);
+      console.log("React Native connection error:", err.message);
+      setIsConnected(false);
     });
 
     socket.on("disconnect", (reason) => {
