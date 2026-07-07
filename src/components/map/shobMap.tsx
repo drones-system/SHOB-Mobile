@@ -16,6 +16,12 @@ export default function ShobMap() {
   // const [drones, setDrones] = useState<Drone[]>([]);
   const [focusedDroneId, setFocusedDroneId] = useState<string | null>(null);
   const toast = useToast();
+  useEffect(() => {
+    const locationInterval = setInterval(() => {
+      updateLocation({ lat: location?.coords.latitude ?? 0, lng: location?.coords.longitude ?? 0 });
+    }, 1000);
+    return () => clearInterval(locationInterval);
+  }, [location])
 
   useEffect(() => {
     if (!isConnected && toast && typeof toast.show === 'function') {
@@ -74,7 +80,6 @@ export default function ShobMap() {
     );
   }
 
-  updateLocation({ lat: location.coords.latitude, lng: location.coords.longitude });
   const { latitude, longitude } = location.coords;
 
   return (
