@@ -4,8 +4,23 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppIcon from '../icons/appIcon/AppIcon';
+// Import the global notification hook
+import { useNotification } from '../notification/NotificationContext';
+
 export default function Navbar() {
+<<<<<<< HEAD
+
+  const insets = useSafeAreaInsets();
+  const { showNotification } = useNotification();
+
+  const handleAlertTrigger = () => {
+    // Triggers your custom global alert notification
+    showNotification("רחפן עיון נמצא בקרבתך! מרחק 100 מ'");
+  };
+
+=======
   const insets = useSafeAreaInsets()
+>>>>>>> 2098f6dc5ae965be00e531761a5f4dee556a3242
   const pathname = usePathname();
 
   return (
@@ -13,7 +28,8 @@ export default function Navbar() {
       <View style={styles.navContent}>
         {/* Left Side: Actions */}
         <View style={styles.leftSection}>
-          <TouchableOpacity style={styles.iconButton}>
+          {/* Three-dots button triggers the notification */}
+          <TouchableOpacity style={styles.iconButton} onPress={handleAlertTrigger}>
             <MaterialIcons name="more-vert" size={24} color="#FFF" />
           </TouchableOpacity>
           <TouchableOpacity
@@ -44,7 +60,7 @@ export default function Navbar() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#26193A', // Figma background color
+    backgroundColor: '#26193A', // Your Figma background color
     width: '100%',
   },
   navContent: {
