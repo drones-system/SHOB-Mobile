@@ -79,10 +79,9 @@ export function ReportPage() {
 
   const hasCapture = lockedHeading !== null;
 
-  // Capture is only possible when camera is granted AND both sensors are available.
+  // Capture is only possible when both sensors are available.
   // While availability is still being checked we also disable (to avoid a flash of enabled state).
   const canCapture =
-    cameraPermission?.granted === true &&
     !orientation.isCheckingAvailability &&
     orientation.isAvailable &&
     !tilt.isCheckingAvailability &&

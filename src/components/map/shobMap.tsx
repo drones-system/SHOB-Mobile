@@ -6,6 +6,7 @@ import MapView, { Circle } from 'react-native-maps';
 import { useToast } from "react-native-toast-notifications";
 import MapActionButtons from './actionButtons/ActionsButtons';
 import DroneComp from './Drone';
+import DroneDetails from './DroneDetails';
 
 export default function ShobMap() {
   const { snapshot, updateLocation, isConnected } = useDroneSocket({ url: 'http://172.17.124.68:8080' });
@@ -15,6 +16,12 @@ export default function ShobMap() {
   // const [drones, setDrones] = useState<Drone[]>([]);
   const [focusedDroneId, setFocusedDroneId] = useState<string | null>(null);
   const toast = useToast();
+  useEffect(() => {
+    const locationInterval = setInterval(() => {
+      updateLocation({ lat: location?.coords.latitude ?? 0, lng: location?.coords.longitude ?? 0 });
+    }, 1000);
+    return () => clearInterval(locationInterval);
+  }, [location])
 
   useEffect(() => {
     if (!isConnected && toast && typeof toast.show === 'function') {
@@ -73,7 +80,6 @@ export default function ShobMap() {
     );
   }
 
-  updateLocation({ lat: location.coords.latitude, lng: location.coords.longitude });
   const { latitude, longitude } = location.coords;
 
   return (
@@ -111,6 +117,9 @@ export default function ShobMap() {
           ))}
         </MapView>
         <MapActionButtons onFocusPress={focusOnUser} />
+        {focusedDroneId && snapshot && snapshot.find(d => d.id === focusedDroneId) && (
+          <DroneDetails drone={snapshot.find(d => d.id === focusedDroneId)!} />
+        )}
       </View>
     </>
   );
