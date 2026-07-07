@@ -76,8 +76,6 @@ export default function ShobMap() {
   updateLocation({ lat: location.coords.latitude, lng: location.coords.longitude });
   const { latitude, longitude } = location.coords;
 
-  console.log(snapshot ? snapshot[0].droneGeom.coordinates : "no cords");
-
   return (
     <>
       <View style={styles.container}>
