@@ -8,7 +8,7 @@ import MapActionButtons from './actionButtons/ActionsButtons';
 import DroneComp from './Drone';
 
 export default function ShobMap() {
-  const { snapshot, updateLocation, isConnected } = useDroneSocket({ url: 'http://localhost:3000' });
+  const { snapshot, updateLocation, isConnected } = useDroneSocket({ url: 'http://172.17.125.84:3000' });
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const mapRef = useRef<MapView>(null);
@@ -72,9 +72,11 @@ export default function ShobMap() {
       </View>
     );
   }
-  
+
   updateLocation({ lat: location.coords.latitude, lng: location.coords.longitude });
   const { latitude, longitude } = location.coords;
+
+  console.log(snapshot ? snapshot[0].droneGeom.coordinates : "no cords");
 
   return (
     <>
