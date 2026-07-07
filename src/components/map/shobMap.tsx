@@ -8,6 +8,7 @@ import { useToast } from "react-native-toast-notifications";
 import { useNotification } from '../notification/NotificationContext';
 import MapActionButtons from './actionButtons/ActionsButtons';
 import DroneComp from './Drone';
+import DroneDetails from './DroneDetails';
 
 /** Haversine formula — returns distance in metres between two lat/lng points */
 function haversineDistance(
@@ -27,7 +28,7 @@ function haversineDistance(
 const ALERT_RADIUS_M = 1500; // 1.5 km
 
 export default function ShobMap() {
-  const { snapshot, updateLocation, isConnected } = useDroneSocket({ url: 'http://172.17.125.84:3000' });
+  const { snapshot, updateLocation, isConnected } = useDroneSocket({ url: 'http://172.17.124.68:8080' });
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const mapRef = useRef<MapView>(null);
@@ -36,6 +37,13 @@ export default function ShobMap() {
   const { showNotification } = useNotification();
   // Track which drone IDs have already triggered an alert so we don't spam
   const alertedDroneIds = useRef<Set<string>>(new Set());
+  
+  useEffect(() => {
+    const locationInterval = setInterval(() => {
+      updateLocation({ lat: location?.coords.latitude ?? 0, lng: location?.coords.longitude ?? 0 });
+    }, 1000);
+    return () => clearInterval(locationInterval);
+  }, [location])
 
   useEffect(() => {
     if (!isConnected && toast && typeof toast.show === 'function') {
@@ -137,7 +145,6 @@ export default function ShobMap() {
     );
   }
 
-  updateLocation({ lat: location.coords.latitude, lng: location.coords.longitude });
   const { latitude, longitude } = location.coords;
 
   return (
@@ -175,6 +182,9 @@ export default function ShobMap() {
           ))}
         </MapView>
         <MapActionButtons onFocusPress={focusOnUser} />
+        {focusedDroneId && snapshot && snapshot.find(d => d.id === focusedDroneId) && (
+          <DroneDetails drone={snapshot.find(d => d.id === focusedDroneId)!} />
+        )}
       </View>
     </>
   );
