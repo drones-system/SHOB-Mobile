@@ -25,6 +25,8 @@ export const useDroneSocket = ({ url, subscriptionType = "NO_SIM_ONLY" }: UseDro
       transports: ["websocket"],
       upgrade: false,            // Prevents trying to switch between polling and websockets
       autoConnect: true,
+      rejectUnauthorized: false,
+      reconnection: true,
     });
 
     socketRef.current = socket;
