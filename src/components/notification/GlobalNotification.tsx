@@ -5,41 +5,47 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNotification } from './NotificationContext';
 
 export default function GlobalNotification() {
-    const { visible, message, hideNotification } = useNotification();
+    // Destructure message, body, and text to catch whatever property name your custom context file uses
+    const context = useNotification() as any;
+    const visible = context?.visible;
+    const hideNotification = context?.hideNotification;
+
+    // Safeguard: Fallback to whatever string exists in your context hook
+    const displayMessage = context?.message || context?.body || context?.text || "";
+
     const panY = useRef(new Animated.Value(0)).current;
+    const activeSoundRef = useRef<Audio.Sound | null>(null);
 
     useEffect(() => {
-        let soundObject: Audio.Sound | null = null;
-
-        async function playBuiltInSound() {
+        async function playAssetSound() {
             try {
-                // Enforce audio routing behavior to bypass physical silent/vibrate toggles
                 await Audio.setAudioModeAsync({
                     playsInSilentModeIOS: true,
                     allowsRecordingIOS: false,
                     staysActiveInBackground: false,
-                    shouldRouteThroughEarpieceAndroid: false,
+                    playThroughEarpieceAndroid: false,
                 });
 
-                // Load and play a high-quality digital alarm ping straight via URL
                 const { sound } = await Audio.Sound.createAsync(
-                    { uri: 'https://actions.google.com/sounds/v1/alerts/digital_watch_alarm_long.ogg' },
-                    { shouldPlay: true }
+                    require('../../assets/sounds/enemy_drone_popup.mp3')
                 );
-                soundObject = sound;
+
+                activeSoundRef.current = sound;
+                await sound.playAsync();
             } catch (error) {
-                console.log('Error playing remote audio:', error);
+                console.log('Error loading or playing the custom asset file:', error);
             }
         }
 
         if (visible) {
             panY.setValue(0);
-            playBuiltInSound();
+            playAssetSound();
         }
 
         return () => {
-            if (soundObject) {
-                soundObject.unloadAsync();
+            if (activeSoundRef.current) {
+                activeSoundRef.current.unloadAsync().catch(() => { });
+                activeSoundRef.current = null;
             }
         };
     }, [visible]);
@@ -58,6 +64,12 @@ export default function GlobalNotification() {
             },
             onPanResponderRelease: (_, gestureState) => {
                 if (gestureState.dy < -40) {
+                    if (activeSoundRef.current) {
+                        activeSoundRef.current.stopAsync().catch(() => { });
+                        activeSoundRef.current.unloadAsync().catch(() => { });
+                        activeSoundRef.current = null;
+                    }
+
                     Animated.timing(panY, {
                         toValue: -150,
                         duration: 200,
@@ -97,7 +109,8 @@ export default function GlobalNotification() {
                 {/* LEFT SIDE: Text Stack */}
                 <View style={styles.textStack}>
                     <Text style={styles.titleText}>רחפן עיון נמצא בקרבתך!</Text>
-                    <Text style={styles.distanceText}>מרחק 100 מ'</Text>
+                    {/* Dynamically fallback to whatever valid text string came out of your context state */}
+                    {displayMessage ? <Text style={styles.distanceText}>{displayMessage}</Text> : null}
                 </View>
             </Animated.View>
         </SafeAreaView>
@@ -106,7 +119,7 @@ export default function GlobalNotification() {
 
 const screenWidth: number = Dimensions.get('window').width;
 const GLOBAL_RED: string = '#FF0000';
-const PURPLE_BG: string = '#6A0D91';
+const PURPLE_BG: string = '#000000';
 
 const styles = StyleSheet.create({
     globalContainer: {
@@ -168,6 +181,6 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         textAlign: 'right',
         width: '100%',
-        marginTop: 2,
+        marginTop: 4,
     },
 });
