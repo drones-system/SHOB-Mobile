@@ -20,12 +20,13 @@ export default function Navbar() {
       <View style={styles.navContent}>
         {/* Left Side: Actions */}
         <View style={styles.leftSection}>
-          <TouchableOpacity style={styles.iconButton}>
+          {/* Three-dots button triggers the notification */}
+          <TouchableOpacity style={styles.iconButton} onPress={handleAlertTrigger}>
             <MaterialIcons name="more-vert" size={24} color="#FFF" />
           </TouchableOpacity>
 
-          {/* Linked to trigger the notification popup */}
-          <TouchableOpacity style={styles.iconButton} onPress={handleAlertTrigger}>
+          {/* Bell button — no action */}
+          <TouchableOpacity style={styles.iconButton}>
             <MaterialIcons name="notifications-none" size={24} color="#FFF" />
           </TouchableOpacity>
         </View>
