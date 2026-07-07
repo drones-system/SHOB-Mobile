@@ -5,11 +5,7 @@ import { Drone } from '../../types/types';
 import DroneIcon from './DroneIcon';
 import FocusedDroneIcon from './FocusedDroneIcon';
 
-export const droneClassificationColors = {
-  ally: '#4084FF',
-  unclassified: '#F0A023',
-  enemy: '#DA3E3F',
-};
+import { droneClassificationColors } from '../../constants/drone';
 
 interface DroneMarkerProps {
   drone: Drone;
@@ -67,7 +63,7 @@ export default function DroneComp({ drone, isFocused, onPress }: DroneMarkerProp
       }}
     >
       <View style={styles.iconContainer}>
-        <View style={[styles.iconContainer, { transform: [{ rotate: `${drone.heading || 0}deg` }] }]}>
+        <View style={[styles.iconContainer, { transform: [{ rotate: `${120}deg` }] }]}>
           <Animated.View style={[styles.absoluteIcon, { opacity: Animated.subtract(1, focusAnim), transform: [{ scale: Animated.add(1, Animated.multiply(focusAnim, 1.5)) }] }]}>
             <DroneIcon color={color} size={30} />
           </Animated.View>
