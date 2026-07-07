@@ -8,6 +8,7 @@ import AppIcon from '../icons/appIcon/AppIcon';
 import { useNotification } from '../notification/NotificationContext';
 
 export default function Navbar() {
+<<<<<<< HEAD
 
   const insets = useSafeAreaInsets();
   const { showNotification } = useNotification();
@@ -17,6 +18,9 @@ export default function Navbar() {
     showNotification("רחפן עיון נמצא בקרבתך! מרחק 100 מ'");
   };
 
+=======
+  const insets = useSafeAreaInsets()
+>>>>>>> 2098f6dc5ae965be00e531761a5f4dee556a3242
   const pathname = usePathname();
 
   return (
@@ -27,11 +31,6 @@ export default function Navbar() {
           {/* Three-dots button triggers the notification */}
           <TouchableOpacity style={styles.iconButton} onPress={handleAlertTrigger}>
             <MaterialIcons name="more-vert" size={24} color="#FFF" />
-          </TouchableOpacity>
-
-          {/* Bell button — no action */}
-          <TouchableOpacity style={styles.iconButton}>
-            <MaterialIcons name="notifications-none" size={24} color="#FFF" />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.iconButton}
