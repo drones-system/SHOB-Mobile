@@ -1,25 +1,27 @@
+import { MaterialIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useLocation } from '@/hooks/use-location';
-import { useReportDrone } from '@/hooks/use-report-drone';
 import { useDeviceOrientation } from '@/hooks/use-device-orientation';
 import { useDeviceTilt } from '@/hooks/use-device-tilt';
+import { useLocation } from '@/hooks/use-location';
+import { useReportDrone } from '@/hooks/use-report-drone';
 import { useCameraPermissions } from 'expo-camera';
 
-import { Colors, FontFamily } from './constants';
 import { CaptureModal } from './capture-modal';
+import { Colors, FontFamily } from './constants';
 import { SuccessView } from './success-view';
 
 export function ReportPage() {
@@ -86,19 +88,15 @@ export function ReportPage() {
     !tilt.isCheckingAvailability &&
     tilt.isAvailable;
 
-  const canSubmit =
-    !location.isLoading &&
-    location.latitude !== null &&
-    !isLoading &&
-    description.trim().length > 0;
+  const canSubmit = !isLoading;
 
   async function handleSubmit() {
-    if (!canSubmit || location.latitude === null || location.longitude === null) return;
+    if (!canSubmit) return;
 
     await submitReport({
       latitude: location.latitude,
       longitude: location.longitude,
-      description: description.trim(),
+      description: description.trim() || undefined,
       heading: lockedHeading ?? undefined,
       deviceMotionRotation: lockedRotation,
       magnetometer: lockedMagnetometer,
@@ -128,12 +126,12 @@ export function ReportPage() {
     location.isLoading
       ? 'Acquiring GPS…'
       : location.latitude !== null && location.longitude !== null
-      ? `${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`
-      : location.error ?? 'Location unavailable';
+        ? `${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`
+        : location.error ?? 'Location unavailable';
 
   // ── Report form ────────────────────────────────────────────────────────────
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={['bottom', 'left', 'right']}>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -144,8 +142,21 @@ export function ReportPage() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* ── Page Title ───────────────────────────────────────────────── */}
-          <Text style={styles.pageTitle}>דיווח הרחפן</Text>
+          {/* ── Header Row ───────────────────────────────────────────────── */}
+          <View style={styles.headerRow}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => router.replace('/')}
+              accessibilityRole="button"
+              accessibilityLabel="סגור דיווח"
+            >
+              <MaterialIcons name="close" size={24} color={Colors.white} />
+            </TouchableOpacity>
+          </View>
+          <View>
+            <View style={{ width: 40 }} />
+            <Text style={styles.pageTitle}>דיווח הרחפן</Text>
+          </View>
 
           {/* ── Location row ─────────────────────────────────────────────── */}
           <View style={styles.locationRow}>
@@ -178,8 +189,8 @@ export function ReportPage() {
               {hasCapture
                 ? `סיכול נלכד ◦ ${lockedHeading}°${lockedPitch !== null ? ` · ${lockedPitch}° elevation` : ''}`
                 : !canCapture
-                ? 'Camera / sensors unavailable'
-                : 'כוון וצלם את הרחפן'}
+                  ? 'Camera / sensors unavailable'
+                  : 'כוון וצלם את הרחפן'}
             </Text>
           </TouchableOpacity>
 
@@ -199,8 +210,8 @@ export function ReportPage() {
                 style={styles.textArea}
                 value={description}
                 onChangeText={setDescription}
-                placeholder="רחפן שחור, נע בצורה חריגה, תנועות חדות, נע לכיוון מזרח..."
-                placeholderTextColor="rgba(189,189,189,0.69)"
+                placeholder="סוג הרחפן, צבע, רעש, גובה, כיוון טיסה..."
+                placeholderTextColor={Colors.textMuted}
                 multiline
                 numberOfLines={6}
                 maxLength={500}
@@ -227,7 +238,7 @@ export function ReportPage() {
             onPress={handleSubmit}
             disabled={!canSubmit || isLoading}
             accessibilityRole="button"
-            accessibilityLabel="Submit drone report"
+            accessibilityLabel="שלח דיווח"
             accessibilityState={{ disabled: !canSubmit || isLoading }}
           >
             {isLoading ? (
@@ -257,10 +268,21 @@ const styles = StyleSheet.create({
   scrollContent: {
     // ~95% width: 2.5% padding each side
     paddingHorizontal: '2.5%',
-    paddingTop: 24,
+    paddingTop: 0,
     paddingBottom: 56,
     gap: 20,
     alignItems: 'flex-end',
+  },
+
+  // Header Row & Close Button
+  headerRow: {
+    flexDirection: 'row',
+    alignSelf: 'stretch',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  closeButton: {
+    padding: 8,
   },
 
   // Page title
@@ -270,7 +292,6 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     textAlign: 'right',
-    alignSelf: 'flex-end',
   },
 
   // Location row

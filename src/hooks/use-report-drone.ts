@@ -1,11 +1,12 @@
 import { useCallback, useState } from 'react';
+import * as Device from 'expo-device';
 
 export type ReportingMode = 'pointing' | 'text';
 
 export type ReportDronePayload = {
-  latitude: number;
-  longitude: number;
-  description: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  description?: string;
   /** Compass heading in degrees [0, 360) when reporting mode is 'pointing' */
   heading?: number;
   /** Raw rotation values from DeviceMotion sensor for backend calculation */
@@ -13,7 +14,7 @@ export type ReportDronePayload = {
   /** Raw magnetometer values for backend calculation */
   magnetometer?: { x: number; y: number; z: number } | null;
   /** How the user located the drone */
-  reportingMode: ReportingMode;
+  reportingMode?: ReportingMode;
 };
 
 export type ReportState = {
@@ -47,14 +48,21 @@ export function useReportDrone() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          latitude: payload.latitude,
-          longitude: payload.longitude,
-          description: payload.description,
+          latitude: payload.latitude ?? null,
+          longitude: payload.longitude ?? null,
+          description: payload.description ?? '',
           heading: payload.heading ?? null,
           deviceMotionRotation: payload.deviceMotionRotation ?? null,
           magnetometer: payload.magnetometer ?? null,
-          reportingMode: payload.reportingMode,
+          reportingMode: payload.reportingMode ?? 'text',
           reportedAt: new Date().toISOString(),
+          userInfo: {
+            brand: Device.brand,
+            deviceName: Device.deviceName,
+            modelName: Device.modelName,
+            osName: Device.osName,
+            osVersion: Device.osVersion,
+          },
         }),
       });
 
