@@ -17,6 +17,7 @@ export interface UseDroneSocketProps {
 export const useDroneSocket = ({ url, subscriptionType = "NO_SIM_ONLY" }: UseDroneSocketProps) => {
   const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [update, setUpdate] = useState<Drone | null>(null);
   const [snapshot, setSnapshot] = useState<Drone[] | null>(null);
 
   useEffect(() => {
@@ -48,6 +49,10 @@ export const useDroneSocket = ({ url, subscriptionType = "NO_SIM_ONLY" }: UseDro
       setSnapshot(data);
     });
 
+    socket.on("drones.update", (data: Drone) => {
+      setUpdate(data);
+    });
+
     socket.on("connect_error", (err) => {
       console.log("React Native connection error:", err.message);
       setIsConnected(false);
@@ -77,5 +82,6 @@ export const useDroneSocket = ({ url, subscriptionType = "NO_SIM_ONLY" }: UseDro
     isConnected,
     snapshot,
     updateLocation,
+    update,
   };
 };
