@@ -8,9 +8,10 @@ import { RFIcon } from '../icons/neutralizationIcons/RF';
 
 interface DroneDetailsProps {
   drone: Drone;
+  unFocus: () => void;
 }
 
-export default function DroneDetails({ drone }: DroneDetailsProps) {
+export default function DroneDetails({ drone, unFocus }: DroneDetailsProps) {
   const color = droneClassificationColors[drone.classification] || '#FFF';
   const title = droneClassificationNames[drone.classification] || 'לא מזוהה';
 
@@ -37,6 +38,8 @@ export default function DroneDetails({ drone }: DroneDetailsProps) {
       if (!response.ok) {
         console.warn('Neutralization request failed', response.status);
       }
+
+      unFocus();
     } catch (error) {
       console.error('Error sending neutralization request', error);
     }
@@ -80,11 +83,11 @@ export default function DroneDetails({ drone }: DroneDetailsProps) {
         <View style={styles.enemySection}>
           <Text style={styles.warningText}>פקודה זו לא ניתנת לבטל!</Text>
           <View style={styles.buttonsContainer}>
-            <TouchableOpacity style={styles.button} onPress={() => handleNeutralize('RFJAM')}>
+            <TouchableOpacity style={styles.button} onPress={async () => await handleNeutralize('RFJAM')}>
               <Text style={styles.buttonText}>נטרול RF</Text>
               <RFIcon></RFIcon>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={() => handleNeutralize('GPSJAM')}>
+            <TouchableOpacity style={styles.button} onPress={async () => await handleNeutralize('GPSJAM')}>
               <Text style={styles.buttonText}>נטרול GPS</Text>
               <GPSIcon></GPSIcon>
             </TouchableOpacity>
