@@ -1,5 +1,5 @@
-import { useCallback, useState } from 'react';
 import * as Device from 'expo-device';
+import { useCallback, useState } from 'react';
 
 export type ReportingMode = 'pointing' | 'text';
 

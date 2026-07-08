@@ -1,14 +1,17 @@
 import React from 'react';
-import { Dimensions, Platform, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import { droneClassificationColors, droneClassificationNames } from '../../constants/drone';
 import { Drone } from '../../types/types';
+import { GPSIcon } from '../icons/neutralizationIcons/GPS';
+import { RFIcon } from '../icons/neutralizationIcons/RF';
 
 interface DroneDetailsProps {
   drone: Drone;
+  unFocus: () => void;
 }
 
-export default function DroneDetails({ drone }: DroneDetailsProps) {
+export default function DroneDetails({ drone, unFocus }: DroneDetailsProps) {
   const color = droneClassificationColors[drone.classification] || '#FFF';
   const title = droneClassificationNames[drone.classification] || 'לא מזוהה';
 
@@ -19,6 +22,28 @@ export default function DroneDetails({ drone }: DroneDetailsProps) {
   // Calculate speed assuming velocity is in m/s, converting to km/h
   const speed = Math.round(Math.sqrt(Math.pow(drone.velocityNorth || 0, 2) + Math.pow(drone.velocityEast || 0, 2)) * 3.6);
   const heading = Math.round(drone.heading || 0);
+  // Sends neutralization request for RF
+  const handleNeutralize = async (type: string) => {
+    try {
+      const response = await fetch('http://172.17.125.84:8080/neutralization', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          droneId: drone.droneId,
+          type: type,
+        }),
+      });
+      if (!response.ok) {
+        console.warn('Neutralization request failed', response.status);
+      }
+
+      unFocus();
+    } catch (error) {
+      console.error('Error sending neutralization request', error);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -37,8 +62,9 @@ export default function DroneDetails({ drone }: DroneDetailsProps) {
 
       <View style={styles.detailsGrid}>
         <View style={styles.gridItem}>
-          <Text style={styles.label}>מזהה</Text>
-          <Text style={styles.value}>{drone.trackId}</Text>
+          <Text style={styles.label}>מיקום נוכחי</Text>
+          <Text style={styles.value}>{latitude}°, {longitude}°</Text>
+
         </View>
         <View style={styles.gridItem}>
           <Text style={styles.label}>גובה</Text>
@@ -53,11 +79,21 @@ export default function DroneDetails({ drone }: DroneDetailsProps) {
           <Text style={styles.value}>{heading}°</Text>
         </View>
       </View>
-
-      <View style={styles.locationRow}>
-        <Text style={styles.label}>נ.צ.</Text>
-        <Text style={styles.value}>{latitude}°, {longitude}°</Text>
-      </View>
+      {drone.classification === "enemy" && (
+        <View style={styles.enemySection}>
+          <Text style={styles.warningText}>פקודה זו לא ניתנת לבטל!</Text>
+          <View style={styles.buttonsContainer}>
+            <TouchableOpacity style={styles.button} onPress={async () => await handleNeutralize('RFJAM')}>
+              <Text style={styles.buttonText}>נטרול RF</Text>
+              <RFIcon></RFIcon>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={async () => await handleNeutralize('GPSJAM')}>
+              <Text style={styles.buttonText}>נטרול GPS</Text>
+              <GPSIcon></GPSIcon>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -163,5 +199,39 @@ const styles = StyleSheet.create({
     textAlignVertical: 'center',
     borderRadius: 5,
     flexGrow: 0,
-  }
+  },
+  enemySection: {
+    marginTop: 12,
+    alignItems: 'center',
+  },
+  warningText: {
+    color: '#8A8D93',
+    fontSize: 15,
+    marginBottom: 15,
+    textAlign: 'center',
+    fontWeight: '600',
+    fontFamily: 'Rubik',
+  },
+  buttonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 30,
+  },
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    borderColor: '#DA3E3F',
+    borderWidth: 1,
+    gap: 8,
+  },
+  buttonText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+    fontFamily: 'Rubik',
+  },
 });
