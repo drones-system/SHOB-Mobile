@@ -28,7 +28,7 @@ function haversineDistance(
 const ALERT_RADIUS_M = 1500; // 1.5 km
 
 export default function ShobMap() {
-  const { snapshot, updateLocation, isConnected } = useDroneSocket({ url: 'http://172.17.124.68:8080' });
+  const { snapshot, updateLocation, isConnected } = useDroneSocket({ subscriptionType: "SIM_ONLY", url: 'http://172.17.125.84:3000', });
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const mapRef = useRef<MapView>(null);
@@ -37,7 +37,9 @@ export default function ShobMap() {
   const { showNotification } = useNotification();
   // Track which drone IDs have already triggered an alert so we don't spam
   const alertedDroneIds = useRef<Set<string>>(new Set());
-  
+
+  const [hideId, setHideId] = useState<string>("");
+
   useEffect(() => {
     const locationInterval = setInterval(() => {
       updateLocation({ lat: location?.coords.latitude ?? 0, lng: location?.coords.longitude ?? 0 });
@@ -45,16 +47,16 @@ export default function ShobMap() {
     return () => clearInterval(locationInterval);
   }, [location])
 
-  useEffect(() => {
-    if (!isConnected && toast && typeof toast.show === 'function') {
-      toast.show("Socket connection failed", {
-        type: "danger",
-        placement: "top",
-        duration: 4000,
-        animationType: "slide-in",
-      });
-    }
-  }, [isConnected, toast]);
+  // useEffect(() => {
+  //   if (!isConnected && toast && typeof toast.show === 'function') {
+  //     toast.show("Socket connection failed", {
+  //       type: "danger",
+  //       placement: "top",
+  //       duration: 4000,
+  //       animationType: "slide-in",
+  //     });
+  //   }
+  // }, [isConnected, toast]);
 
   // ── Proximity detection ──────────────────────────────────────────────────
   useEffect(() => {
@@ -169,8 +171,9 @@ export default function ShobMap() {
             strokeColor="#4084FF"
             lineDashPattern={[5, 5]}
           />
-          {isConnected && snapshot && snapshot.map((drone) => (
-            <DroneComp
+          {isConnected && snapshot && snapshot.map((drone) => {
+            return (
+            hideId !== drone.id && <DroneComp
               key={drone.id}
               drone={drone}
               isFocused={focusedDroneId === drone.id}
@@ -179,11 +182,12 @@ export default function ShobMap() {
                 setFocusedDroneId(focusedDroneId === drone.id ? null : drone.id)
               }}
             />
-          ))}
+          )})}
         </MapView>
         <MapActionButtons onFocusPress={focusOnUser} />
         {focusedDroneId && snapshot && snapshot.find(d => d.id === focusedDroneId) && (
-          <DroneDetails drone={snapshot.find(d => d.id === focusedDroneId)!} />
+          <DroneDetails drone={snapshot.find(d => d.id === focusedDroneId)!}
+            unFocus={() => setFocusedDroneId(null)} setHide={(id) => setHideId(id)} />
         )}
       </View>
     </>

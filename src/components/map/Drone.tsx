@@ -82,10 +82,12 @@ const styles = StyleSheet.create({
     height: 75,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'visible',
   },
   absoluteIcon: {
     position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'visible',
   }
 });

@@ -101,6 +101,9 @@ export function ReportPage() {
       magnetometer: lockedMagnetometer,
       reportingMode: hasCapture ? 'pointing' : 'text',
     });
+
+    // Navigate home regardless of success or error
+    router.replace('/');
   }
 
   function handleReset() {
@@ -221,12 +224,7 @@ export function ReportPage() {
             </View>
           </View>
 
-          {/* ── Error banner ─────────────────────────────────────────────── */}
-          {error && (
-            <View style={styles.errorBanner}>
-              <Text style={styles.errorBannerText}>⚠ {error}</Text>
-            </View>
-          )}
+          {/* Error banner removed — errors silently redirect to home */}
 
           {/* ── Submit button ─────────────────────────────────────────────── */}
           <TouchableOpacity
