@@ -14,10 +14,29 @@ export interface UseDroneSocketProps {
   subscriptionType?: SubscriptionType;
 }
 
-export const useDroneSocket = ({ url, subscriptionType = "NO_SIM_ONLY" }: UseDroneSocketProps) => {
+export const useDroneSocket = ({ url, subscriptionType = "SIM_ONLY" }: UseDroneSocketProps) => {
   const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [snapshot, setSnapshot] = useState<Drone[] | null>(null);
+  const lastSeenRef = useRef<Record<string, number>>({});
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSnapshot(currentSnapshot => {
+        if (!currentSnapshot) return null;
+        
+        const now = Date.now();
+        const filtered = currentSnapshot.filter(drone => {
+          const lastSeen = lastSeenRef.current[drone.droneId];
+          return lastSeen && (now - lastSeen) <= 10000;
+        });
+
+        return filtered.length === currentSnapshot.length ? currentSnapshot : filtered;
+      });
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     // Create the socket reference and config for connection
@@ -45,7 +64,29 @@ export const useDroneSocket = ({ url, subscriptionType = "NO_SIM_ONLY" }: UseDro
     });
 
     socket.on("drones.snapshot", (data: Drone[]) => {
+      console.log("Recieved snapshot with " + data.length + "drones");
+      const now = Date.now();
+      data.forEach(drone => {
+        lastSeenRef.current[drone.droneId] = now;
+      });
       setSnapshot(data);
+    });
+
+    socket.on("drone.updated", (updatedDrone: Drone) => {
+      console.log("Recieved drone update with id" + updatedDrone.droneId);
+      lastSeenRef.current[updatedDrone.droneId] = Date.now();
+      setSnapshot((currentSnapshot) => {
+        if (!currentSnapshot) return [updatedDrone];
+        
+        const index = currentSnapshot.findIndex(d => d.droneId === updatedDrone.droneId);
+        if (index !== -1) {
+          const newSnapshot = [...currentSnapshot];
+          newSnapshot[index] = updatedDrone;
+          return newSnapshot;
+        } else {
+          return [...currentSnapshot, updatedDrone];
+        }
+      });
     });
 
     socket.on("connect_error", (err) => {
