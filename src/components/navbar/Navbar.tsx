@@ -1,21 +1,43 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import { router, usePathname } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppIcon from '../icons/appIcon/AppIcon';
+// Import the global notification hook
+import { useNotification } from '../notification/NotificationContext';
+
 export default function Navbar() {
-  const insets = useSafeAreaInsets()
+  const insets = useSafeAreaInsets();
+  const { showNotification } = useNotification();
+
+  const handleAlertTrigger = () => {
+    // Triggers your custom global alert notification
+    showNotification("רחפן עיון נמצא בקרבתך! מרחק 100 מ'");
+  };
+
+  const pathname = usePathname();
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.navContent}>
         {/* Left Side: Actions */}
         <View style={styles.leftSection}>
-          <TouchableOpacity style={styles.iconButton}>
+          {/* Three-dots button triggers the notification */}
+          <TouchableOpacity style={styles.iconButton} onPress={handleAlertTrigger}>
             <MaterialIcons name="more-vert" size={24} color="#FFF" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <MaterialIcons name="notifications-none" size={24} color="#FFF" />
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={() => {
+              if (pathname !== '/report') {
+                router.push('/report');
+              }
+            }}
+            accessibilityRole="button"
+            accessibilityLabel="Open drone report"
+          >
+            <MaterialIcons name="campaign" size={24} color="#FFF" />
           </TouchableOpacity>
         </View>
 
@@ -33,7 +55,7 @@ export default function Navbar() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#26193A', // Figma background color
+    backgroundColor: '#26193A', // Your Figma background color
     width: '100%',
   },
   navContent: {
