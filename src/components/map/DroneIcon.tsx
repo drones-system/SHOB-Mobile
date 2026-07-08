@@ -1,12 +1,53 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Svg, { Path } from 'react-native-svg';
+import { useEasterEgg } from '../easter-egg/EasterEggContext';
+
+import Eitan from '../../../assets/usvg/eitan.svg';
+import Fogel01 from '../../../assets/usvg/fogel01.svg';
+import Fogel02 from '../../../assets/usvg/fogel02.svg';
+import Sashusinka from '../../../assets/usvg/sashusinka.svg';
+import Shahar from '../../../assets/usvg/shahar.svg';
 
 interface DroneIconProps {
   color: string;
   size?: number;
 }
 
+const DEV_HEADS = [Eitan, Fogel01, Fogel02, Sashusinka, Shahar] as const;
+
+function getEasterIndex(): number {
+  return Math.floor(Date.now() / 2000) % DEV_HEADS.length;
+}
+
 export default function DroneIcon({ color, size = 30 }: DroneIconProps) {
+  const { funnyMode } = useEasterEgg();
+  const [easterIndex, setEasterIndex] = useState<number>(getEasterIndex);
+
+  useEffect(() => {
+    if (!funnyMode) return;
+
+    const msUntilNextTick = 2000 - (Date.now() % 2000);
+    let timeoutId: ReturnType<typeof setTimeout>;
+    let intervalId: ReturnType<typeof setInterval>;
+
+    timeoutId = setTimeout(() => {
+      setEasterIndex(getEasterIndex());
+      intervalId = setInterval(() => {
+        setEasterIndex(getEasterIndex());
+      }, 2000);
+    }, msUntilNextTick);
+
+    return () => {
+      clearTimeout(timeoutId);
+      clearInterval(intervalId);
+    };
+  }, [funnyMode]);
+
+  if (funnyMode) {
+    const DevHead = DEV_HEADS[easterIndex];
+    return <DevHead width={size} height={size} />;
+  }
+
   return (
     <Svg width={size} height={size * (29 / 30)} viewBox="0 0 30 29" fill="none">
       <Path

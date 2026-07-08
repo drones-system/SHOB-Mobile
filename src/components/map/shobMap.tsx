@@ -28,7 +28,7 @@ function haversineDistance(
 const ALERT_RADIUS_M = 1500; // 1.5 km
 
 export default function ShobMap() {
-  const { snapshot, updateLocation, isConnected } = useDroneSocket({ subscriptionType: "SIM_ONLY", url: 'http://172.17.125.84:3000', });
+  const { snapshot, updateLocation, isConnected } = useDroneSocket({ subscriptionType: "SIM_ONLY", url: 'http://172.17.124.68:8080', });
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const mapRef = useRef<MapView>(null);
