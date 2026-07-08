@@ -22,8 +22,8 @@ export default function MapActionButtons({ onFocusPress }: MapActionButtonsProps
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    right: 16,
-    top: '10%',
+    left: 16,
+    top: '3%',
     flexDirection: 'column',
     alignItems: 'flex-start',
     gap: 16,
