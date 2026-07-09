@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { router, usePathname } from 'expo-router';
 import React, { useRef } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useEasterEgg } from '../easter-egg/EasterEggContext';
 import AppIcon from '../icons/appIcon/AppIcon';
@@ -77,7 +77,14 @@ export default function Navbar() {
             activeOpacity={0.7}
             accessibilityLabel="App icon"
           >
-            <AppIcon />
+            {funnyMode ? (
+              <Image
+                source={require('../../assets/easter_egg/main_icon/butti_banana.png')}
+                style={{ width: 36, height: 36 }}
+              />
+            ) : (
+              <AppIcon />
+            )}
           </TouchableOpacity>
         </View>
       </View>
