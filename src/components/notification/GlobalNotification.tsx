@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEasterEgg } from '../easter-egg/EasterEggContext';
 import { useNotification } from './NotificationContext';
 
-const EASTER_EGG_NAMES = ['Sasha', 'Omer', 'Shahar', 'Eitan'] as const;
+const EASTER_EGG_NAMES = ['סשה', 'עומר', 'שחר', 'איתן'] as const;
 const RAINBOW_COLORS = [
     '#FF0000', '#FF7700', '#FFFF00', '#00FF00',
     '#0000FF', '#8B00FF', '#FF0000',

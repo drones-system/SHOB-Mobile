@@ -65,7 +65,7 @@ export default function DroneComp({ drone, isFocused, onPress }: DroneMarkerProp
       <View style={styles.iconContainer}>
         <View style={[styles.iconContainer, { transform: [{ rotate: `${120}deg` }] }]}>
           <Animated.View style={[styles.absoluteIcon, { opacity: Animated.subtract(1, focusAnim), transform: [{ scale: Animated.add(1, Animated.multiply(focusAnim, 1.5)) }] }]}>
-            <DroneIcon color={color} size={30} />
+            <DroneIcon color={color} size={30} droneId={drone.droneId} />
           </Animated.View>
           <Animated.View pointerEvents="none" style={[styles.absoluteIcon, { opacity: focusAnim, transform: [{ scale: Animated.add(0.5, Animated.multiply(focusAnim, 0.5)) }] }]}>
             <FocusedDroneIcon color={color} size={75} />

@@ -1,51 +1,43 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Svg, { Path } from 'react-native-svg';
 import { useEasterEgg } from '../easter-egg/EasterEggContext';
 
-import Eitan from '../../../assets/usvg/eitan.svg';
-import Fogel01 from '../../../assets/usvg/fogel01.svg';
-import Fogel02 from '../../../assets/usvg/fogel02.svg';
-import Sashusinka from '../../../assets/usvg/sashusinka.svg';
-import Shahar from '../../../assets/usvg/shahar.svg';
+import { Eitan } from '../icons/easterEggIcons/eitan';
+import { Fogel01 } from '../icons/easterEggIcons/fogel01';
+import { Fogel02 } from '../icons/easterEggIcons/fogel02';
+import { Sashusinka } from '../icons/easterEggIcons/sashusinka';
+import { Shahar } from '../icons/easterEggIcons/shahar';
 
 interface DroneIconProps {
   color: string;
   size?: number;
+  /** Drone identifier used to pick a stable funny-mode icon for this drone */
+  droneId?: string;
 }
 
-const DEV_HEADS = [Eitan, Fogel01, Fogel02, Sashusinka, Shahar] as const;
+const FUNNY_ICONS = [<Eitan/>, <Fogel01/>, <Fogel02/>, <Sashusinka/>, <Shahar/>] as const;
 
-function getEasterIndex(): number {
-  return Math.floor(Date.now() / 2000) % DEV_HEADS.length;
+/** Display size (px) for funny-mode icons — large enough to show the full image */
+const FUNNY_SIZE = 60;
+
+/**
+ * Returns a stable index derived from droneId so each drone always gets
+ * the same funny icon, but different drones get different ones.
+ */
+function stableIndex(droneId: string, count: number): number {
+  let hash = 0;
+  for (let i = 0; i < droneId.length; i++) {
+    hash = (hash * 31 + droneId.charCodeAt(i)) & 0xffffffff;
+  }
+  return Math.abs(hash) % count;
 }
 
-export default function DroneIcon({ color, size = 30 }: DroneIconProps) {
+export default function DroneIcon({ color, size = 30, droneId = '' }: DroneIconProps) {
   const { funnyMode } = useEasterEgg();
-  const [easterIndex, setEasterIndex] = useState<number>(getEasterIndex);
-
-  useEffect(() => {
-    if (!funnyMode) return;
-
-    const msUntilNextTick = 2000 - (Date.now() % 2000);
-    let timeoutId: ReturnType<typeof setTimeout>;
-    let intervalId: ReturnType<typeof setInterval>;
-
-    timeoutId = setTimeout(() => {
-      setEasterIndex(getEasterIndex());
-      intervalId = setInterval(() => {
-        setEasterIndex(getEasterIndex());
-      }, 2000);
-    }, msUntilNextTick);
-
-    return () => {
-      clearTimeout(timeoutId);
-      clearInterval(intervalId);
-    };
-  }, [funnyMode]);
 
   if (funnyMode) {
-    const DevHead = DEV_HEADS[easterIndex];
-    return <DevHead width={size} height={size} />;
+    const idx = stableIndex(droneId, FUNNY_ICONS.length);
+    return FUNNY_ICONS[idx]
   }
 
   return (

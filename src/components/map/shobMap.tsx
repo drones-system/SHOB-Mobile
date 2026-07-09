@@ -28,7 +28,7 @@ function haversineDistance(
 const ALERT_RADIUS_M = 1500; // 1.5 km
 
 export default function ShobMap() {
-  const baseUrl = process.env.EXPO_PUBLIC_BASE_URL || 'http://172.17.124.68:8080';
+  const baseUrl = process.env.EXPO_PUBLIC_BASE_URL || 'http://172.17.125.84:3000';
   const droneReceivingMode = process.env.EXPO_PUBLIC_DRONE_RECEIVING_MODE as SubscriptionType;
   const { snapshot, updateLocation, isConnected } = useDroneSocket({ subscriptionType: droneReceivingMode, url: baseUrl, });
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
