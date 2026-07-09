@@ -7,7 +7,7 @@ interface FocusedDroneIconProps {
 }
 
 export default function FocusedDroneIcon({ color, size = 75 }: FocusedDroneIconProps) {
-  const filterId = `filter_${color.replace('#', '')}`;
+  const filterId = `filter_${color?.replace('#', '')}`;
   return (
     <Svg width={size} height={size * (74 / 75)} viewBox="0 0 75 74" fill="none">
       <G filter={`url(#${filterId})`}>

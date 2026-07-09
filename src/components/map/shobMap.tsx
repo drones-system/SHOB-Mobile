@@ -1,4 +1,4 @@
-import { useDroneSocket } from '@/hooks/use-websocket';
+import { SubscriptionType, useDroneSocket } from '@/hooks/use-websocket';
 import { Drone } from '@/types/types';
 import * as Location from 'expo-location';
 import React, { useEffect, useRef, useState } from 'react';
@@ -28,7 +28,9 @@ function haversineDistance(
 const ALERT_RADIUS_M = 1500; // 1.5 km
 
 export default function ShobMap() {
-  const { snapshot, updateLocation, isConnected } = useDroneSocket({ subscriptionType: "SIM_ONLY", url: 'http://172.17.124.68:8080', });
+  const baseUrl = process.env.EXPO_PUBLIC_BASE_URL || 'http://172.17.124.68:8080';
+  const droneReceivingMode = process.env.EXPO_PUBLIC_DRONE_RECEIVING_MODE as SubscriptionType;
+  const { snapshot, updateLocation, isConnected } = useDroneSocket({ subscriptionType: droneReceivingMode, url: baseUrl, });
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const mapRef = useRef<MapView>(null);
@@ -74,11 +76,11 @@ export default function ShobMap() {
       const distM = haversineDistance(userLat, userLon, droneLat, droneLon);
 
       if (distM <= ALERT_RADIUS_M) {
-        nowInRange.add(drone.id);
+        nowInRange.add(drone.droneId);
 
         // Only alert once per drone — until it leaves and re-enters
-        if (!alertedDroneIds.current.has(drone.id)) {
-          alertedDroneIds.current.add(drone.id);
+        if (!alertedDroneIds.current.has(drone.droneId)) {
+          alertedDroneIds.current.add(drone.droneId);
 
           const distDisplay =
             distM < 1000
@@ -171,19 +173,18 @@ export default function ShobMap() {
           />
           {isConnected && snapshot && snapshot.map((drone) => (
             <DroneComp
-              key={drone.id}
+              key={drone.droneId}
               drone={drone}
-              isFocused={focusedDroneId === drone.id}
+              isFocused={focusedDroneId === drone.droneId}
               onPress={() => {
-                console.log("HEYY", focusedDroneId);
-                setFocusedDroneId(focusedDroneId === drone.id ? null : drone.id)
+                setFocusedDroneId(focusedDroneId === drone.droneId ? null : drone.droneId)
               }}
             />
           ))}
         </MapView>
         <MapActionButtons onFocusPress={focusOnUser} />
-        {focusedDroneId && snapshot && snapshot.find(d => d.id === focusedDroneId) && (
-          <DroneDetails drone={snapshot.find(d => d.id === focusedDroneId)!}
+        {focusedDroneId && snapshot && snapshot.find(d => d.droneId === focusedDroneId) && (
+          <DroneDetails drone={snapshot.find(d => d.droneId === focusedDroneId)!}
             unFocus={() => setFocusedDroneId(null)} />
         )}
       </View>

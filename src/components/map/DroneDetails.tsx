@@ -25,7 +25,8 @@ export default function DroneDetails({ drone, unFocus }: DroneDetailsProps) {
   // Sends neutralization request for RF
   const handleNeutralize = async (type: string) => {
     try {
-      const response = await fetch('http://172.17.125.84:8080/neutralization', {
+      const baseUrl = process.env.EXPO_PUBLIC_BASE_URL || 'http://172.17.124.68:8080';
+      const response = await fetch(`${baseUrl}/neutralization`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
