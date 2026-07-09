@@ -9,9 +9,10 @@ import { RFIcon } from '../icons/neutralizationIcons/RF';
 interface DroneDetailsProps {
   drone: Drone;
   unFocus: () => void;
+  setHide: (id: string) => void;
 }
 
-export default function DroneDetails({ drone, unFocus }: DroneDetailsProps) {
+export default function DroneDetails({ drone, unFocus, setHide }: DroneDetailsProps) {
   const color = droneClassificationColors[drone.classification] || '#FFF';
   const title = droneClassificationNames[drone.classification] || 'לא מזוהה';
 
@@ -25,21 +26,21 @@ export default function DroneDetails({ drone, unFocus }: DroneDetailsProps) {
   // Sends neutralization request for RF
   const handleNeutralize = async (type: string) => {
     try {
-      const baseUrl = process.env.EXPO_PUBLIC_BASE_URL || 'http://172.17.124.68:8080';
-      const response = await fetch(`${baseUrl}/neutralization`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          droneId: drone.droneId,
-          type: type,
-        }),
-      });
-      if (!response.ok) {
-        console.warn('Neutralization request failed', response.status);
-      }
+      // const response = await fetch('http://172.17.125.84:8080/neutralization', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({
+      //     droneId: drone.droneId,
+      //     type: type,
+      //   }),
+      // });
+      // if (!response.ok) {
+      //   console.warn('Neutralization request failed', response.status);
+      // }
 
+      setHide(drone.id) // REMOVE THIS
       unFocus();
     } catch (error) {
       console.error('Error sending neutralization request', error);
