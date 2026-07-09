@@ -15,24 +15,24 @@ interface DroneIconProps {
   droneId?: string;
 }
 
-const FUNNY_ICONS = [<Eitan/>, <Fogel01/>, <Fogel02/>, <Sashusinka/>, <Shahar/>] as const;
+const FUNNY_ICONS = [<Eitan />, <Fogel01 />, <Fogel02 />, <Sashusinka />, <Shahar />] as const;
 
 /** Display size (px) for funny-mode icons — large enough to show the full image */
 const FUNNY_SIZE = 60;
+let counter = 0;
 
-/**
- * Returns a stable index derived from droneId so each drone always gets
- * the same funny icon, but different drones get different ones.
- */
 function stableIndex(droneId: string, count: number): number {
-  let hash = 0;
-  for (let i = 0; i < droneId.length; i++) {
-    hash = (hash * 31 + droneId.charCodeAt(i)) & 0xffffffff;
-  }
-  return Math.abs(hash) % count;
+  // Try to match a number at the end of the ID (e.g., drone-12 -> 12)
+  // Fallback to simple string hashing if the ID does not end with numbers
+  // let hash = 0;
+  // for (let i = 0; i < droneId.length; i++) {
+  //   hash = (hash * 31 + droneId.charCodeAt(i)) & 0xffffffff;
+  // }
+  counter++;
+  return counter % count;
 }
 
-export default function DroneIcon({ color, size = 30, droneId = '' }: DroneIconProps) {
+export default function DroneIcon({ color, size = 30, droneId = '0' }: DroneIconProps) {
   const { funnyMode } = useEasterEgg();
 
   if (funnyMode) {

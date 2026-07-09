@@ -178,9 +178,9 @@ export default function ShobMap() {
             hideId !== drone.id && <DroneComp
               key={drone.id}
               drone={drone}
-              isFocused={focusedDroneId === drone.droneId}
+              isFocused={focusedDroneId === drone.id}
               onPress={() => {
-                setFocusedDroneId(focusedDroneId === drone.droneId ? null : drone.droneId)
+                setFocusedDroneId(focusedDroneId === drone.id ? null : drone.id)
               }}
             />
           )})}
