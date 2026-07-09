@@ -4,6 +4,16 @@ import { Animated, Dimensions, PanResponder, StyleSheet, Text, View } from 'reac
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNotification } from './NotificationContext';
 
+const EASTER_EGG_NAMES = ['סשה', 'עומר', 'שחר', 'איתן'] as const;
+const RAINBOW_COLORS = [
+    '#FF0000', '#FF7700', '#FFFF00', '#00FF00',
+    '#0000FF', '#8B00FF', '#FF0000',
+];
+
+function getRandomName(): string {
+    return EASTER_EGG_NAMES[Math.floor(Math.random() * EASTER_EGG_NAMES.length)];
+}
+
 export default function GlobalNotification() {
     // Destructure message, body, and text to catch whatever property name your custom context file uses
     const context = useNotification() as any;
@@ -183,4 +193,4 @@ const styles = StyleSheet.create({
         width: '100%',
         marginTop: 4,
     },
-});
+}); 
